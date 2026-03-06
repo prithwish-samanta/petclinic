@@ -1,0 +1,9 @@
+<!DOCTYPE html>
+<html xmlns:th="https://www.thymeleaf.org" th:replace="~{fragments/layout :: layout (~{::section},'home')}" lang="en">
+<section>
+    <h1>Welcome</h1>
+    <div class="col-md-12">
+        <img class="img-responsive" th:src="@{pets.png}" alt="Pets"/>
+    </div>
+</section>
+</html>

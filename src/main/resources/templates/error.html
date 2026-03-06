@@ -1,0 +1,16 @@
+<!DOCTYPE html>
+<html xmlns:th="https://www.thymeleaf.org" th:replace="~{fragments/layout :: layout (~{::section},'error')}" lang="en">
+    <section>
+        <h1>Something happened...</h1>
+
+        <!-- Status-specific error message -->
+        <p th:switch="${status}">
+            <span th:case="404">The requested page was not found.</span>
+            <span th:case="500">An internal server error occurred.</span>
+            <span th:case="*">An unexpected error occurred.</span>
+        </p>
+
+        <!-- Exception message (for developers) -->
+        <p th:text="${message}">Exception message</p>
+    </section>
+</html>

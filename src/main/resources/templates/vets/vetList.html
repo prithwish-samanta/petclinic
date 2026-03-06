@@ -1,0 +1,41 @@
+<!DOCTYPE html>
+<html xmlns:th="https://www.thymeleaf.org" th:replace="~{fragments/layout :: layout (~{::section},'vets')}" lang="en">
+<section>
+    <h2 class="text-center">Veterinarians</h2>
+    <table class="table table-bordered">
+        <thead>
+        <tr>
+            <th scope="col">#</th>
+            <th scope="col">First Name</th>
+            <th scope="col">Last Name</th>
+            <th scope="col">Specialties</th>
+        </tr>
+        </thead>
+        <tbody>
+        <tr th:each="vet : ${listVets}">
+            <th scope="row" th:text="${vet.id}"></th>
+            <td th:text="${vet.firstName}"></td>
+            <td th:text="${vet.lastName}">Doe</td>
+            <td>
+                <span th:each="specialty : ${vet.specialties}" th:text="${specialty.name+' '}"></span>
+                <span th:if="${vet.getNrOfSpecialities() == 0}">none</span>
+            </td>
+        </tr>
+        </tbody>
+    </table>
+    <nav aria-label="Page navigation example" th:if="${totalPages > 1}">
+        <ul class="pagination justify-content-end">
+            <li class="page-item" th:classappend="${currentPage > 1 ? '' : 'disabled'}">
+                <a class="page-link" th:href="@{'/ui/vets.html?page=__${currentPage - 1}__'}">&laquo;</a>
+            </li>
+            <li class="page-item" th:each="i: ${#numbers.sequence(1, totalPages)}">
+                <a class="page-link" th:classappend="${currentPage == i ? 'active' : ''}" th:text="${i}"
+                   th:href="@{'/ui/vets.html?page=__${i}__'}"></a>
+            </li>
+            <li class="page-item" th:classappend="${currentPage < totalPages  ? '' : 'disabled'}">
+                <a class="page-link" th:href="@{'/ui/vets.html?page=__${currentPage + 1}__'}">&raquo;</a>
+            </li>
+        </ul>
+    </nav>
+</section>
+</html>

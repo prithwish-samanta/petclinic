@@ -1,0 +1,28 @@
+database: h2
+spring:
+  application:
+    name: petclinic
+  sql:
+    init:
+      schema-locations: classpath*:db/${database}/schema.sql
+      data-locations: classpath*:db/${database}/data.sql
+  thymeleaf:
+    mode: HTML
+  jpa:
+    hibernate:
+      ddl-auto: none
+      naming:
+        physical-strategy: org.hibernate.boot.model.naming.PhysicalNamingStrategySnakeCaseImpl
+    open-in-view: false
+  jdbc:
+    template:
+      fetch-size: 16
+management:
+  endpoints:
+    web:
+      exposure:
+        include: '*'
+logging:
+  level:
+    org:
+      springframework: INFO
