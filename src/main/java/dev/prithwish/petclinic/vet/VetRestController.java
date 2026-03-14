@@ -16,11 +16,11 @@ import java.util.Map;
 
 @RestController
 @RequiredArgsConstructor
-@RequestMapping("/api")
+@RequestMapping("/api/vets")
 public class VetRestController {
     private final VetRepository vetRepository;
 
-    @GetMapping("/vets")
+    @GetMapping
     public ResponseEntity<Map<String, Object>> showVets(
             @RequestParam(defaultValue = "1") int page,
             @RequestParam(defaultValue = "5") int size,
