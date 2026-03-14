@@ -8,7 +8,6 @@ import org.springframework.http.ResponseEntity;
 
 import java.util.HashMap;
 import java.util.Map;
-import java.util.Optional;
 
 @RestController
 @RequestMapping("/api/visit")
@@ -21,13 +20,13 @@ public class VisitRestController {
         Owner owner = ownerRepository.findById(ownerId).orElseThrow(() -> new IllegalArgumentException("Owner not found with id: " + ownerId
                 + ". Please ensure the ID is correct " + "and the owner exists in the database."));
 
-        Optional<Pet> pet = findPetById(owner, petId);
-        if (pet.isEmpty()) {
+        Pet pet = owner.getPetById(petId);
+        if (pet == null) {
             throw new IllegalArgumentException(
                     "Pet with id " + petId + " not found for owner with id " + ownerId + ".");
         }
         Map<String, Object> res = new HashMap<>();
-        res.put("visits", pet.get().getVisits());
+        res.put("visits", pet.getVisits());
         return ResponseEntity.ok(res);
     }
 
@@ -35,20 +34,16 @@ public class VisitRestController {
     public ResponseEntity<String> crateNewPetVisit(@Valid @RequestBody CreateOrUpdateVisitRequestDTO requestDTO, @PathVariable int ownerId, @PathVariable int petId) {
         Owner owner = ownerRepository.findById(ownerId).orElseThrow(() -> new IllegalArgumentException("Owner not found with id: " + ownerId
                 + ". Please ensure the ID is correct " + "and the owner exists in the database."));
-        Optional<Pet> pet = findPetById(owner, petId);
-        if (pet.isEmpty()) {
+        Pet pet = owner.getPetById(petId);
+        if (pet == null) {
             throw new IllegalArgumentException(
                     "Pet with id " + petId + " not found for owner with id " + ownerId + ".");
         }
         Visit visit = new Visit();
         visit.setDate(requestDTO.date());
         visit.setDescription(requestDTO.description());
-        pet.get().getVisits().add(visit);
+        pet.getVisits().add(visit);
         ownerRepository.save(owner);
         return new ResponseEntity<>("Pet visit created successfully", HttpStatus.CREATED);
-    }
-
-    private Optional<Pet> findPetById(Owner owner, int petId) {
-        return owner.getPets().stream().filter(p -> p.getId() == petId).findFirst();
     }
 }

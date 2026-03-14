@@ -30,4 +30,11 @@ public class Owner extends Person {
     @OneToMany(cascade = CascadeType.ALL, fetch = FetchType.EAGER)
     @JoinColumn(name = "owner_id")
     private List<Pet> pets;
+
+    public Pet getPetById(int petId) {
+        for (Pet pet : pets) {
+            if (pet.getId() == petId) return pet;
+        }
+        return null;
+    }
 }
