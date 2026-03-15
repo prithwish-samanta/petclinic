@@ -1,0 +1,10 @@
+database: mysql
+spring:
+  datasource:
+    username: user
+    password: userpassword
+    url: jdbc:mysql://localhost:3306/petclinic?allowPublicKeyRetrieval=true&useSSL=false&serverTimezone=UTC
+    driver-class-name: com.mysql.cj.jdbc.Driver
+  sql:
+    init:
+      mode: always
