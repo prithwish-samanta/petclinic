@@ -1,9 +1,9 @@
 database: mysql
 spring:
   datasource:
-    username: user
-    password: userpassword
-    url: jdbc:mysql://localhost:3306/petclinic?allowPublicKeyRetrieval=true&useSSL=false&serverTimezone=UTC
+    username: ${MYSQL_USER:petclinic}
+    password: ${MYSQL_PASS:petclinic}
+    url: ${MYSQL_URL:jdbc:mysql://localhost:3306/petclinicdb?allowPublicKeyRetrieval=true&useSSL=false&serverTimezone=UTC}
     driver-class-name: com.mysql.cj.jdbc.Driver
   sql:
     init:
