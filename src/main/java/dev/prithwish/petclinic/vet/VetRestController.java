@@ -1,5 +1,10 @@
 package dev.prithwish.petclinic.vet;
 
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.Parameter;
+import io.swagger.v3.oas.annotations.responses.ApiResponse;
+import io.swagger.v3.oas.annotations.responses.ApiResponses;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
@@ -17,14 +22,19 @@ import java.util.Map;
 @RestController
 @RequiredArgsConstructor
 @RequestMapping("/api/vets")
+@Tag(name = "Vet Management", description = "APIs for managing vets")
 public class VetRestController {
     private final VetRepository vetRepository;
 
+    @Operation(summary = "Get veterinarians", description = "Fetch all the available vets in the clinic")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "Vets retrieved successfully")
+    })
     @GetMapping
     public ResponseEntity<Map<String, Object>> showVets(
-            @RequestParam(defaultValue = "1") int page,
-            @RequestParam(defaultValue = "5") int size,
-            @RequestParam(defaultValue = "id") String sortBy
+            @Parameter(description = "Requested page number", example = "1") @RequestParam(defaultValue = "1") int page,
+            @Parameter(description = "Requested page size", example = "5") @RequestParam(defaultValue = "5") int size,
+            @Parameter(description = "Page element sort key", example = "id") @RequestParam(defaultValue = "id") String sortBy
     ) {
         Map<String, Object> res = new HashMap<>();
 

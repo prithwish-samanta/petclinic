@@ -1,6 +1,14 @@
 package dev.prithwish.petclinic.owner;
 
 import org.springframework.web.bind.annotation.*;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.Parameter;
+import io.swagger.v3.oas.annotations.media.Content;
+import io.swagger.v3.oas.annotations.media.Schema;
+import io.swagger.v3.oas.annotations.responses.ApiResponse;
+import io.swagger.v3.oas.annotations.responses.ApiResponses;
+import io.swagger.v3.oas.annotations.tags.Tag;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
@@ -13,21 +21,30 @@ import java.util.Map;
 @RestController
 @RequestMapping("/api/owners")
 @RequiredArgsConstructor
+@Tag(name = "Owner Management", description = "APIs for managing vets")
 public class OwnerRestController {
     private final OwnerRepository ownerRepository;
 
+    @Operation(summary = "Get owner by id", description = "Fetch owner details by id")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "Owner details retrieved successfully", content = @Content(schema = @Schema(implementation = Owner.class)))
+    })
     @GetMapping("/find/{ownerId}")
-    public ResponseEntity<Owner> findOwner(@PathVariable int ownerId) {
+    public ResponseEntity<Owner> findOwner(@Parameter(description = "Id of the owner", example = "1") @PathVariable int ownerId) {
         Owner res = ownerRepository.findById(ownerId).orElseThrow(() -> new IllegalArgumentException("Owner not found with id: " + ownerId
                 + ". Please ensure the ID is correct " + "and the owner exists in the database."));
         return ResponseEntity.ok(res);
     }
 
+    @Operation(summary = "Search owners by lastname", description = "Search and fetch owners' details by lastname")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "Owner search result retrieved successfully")
+    })
     @GetMapping("/find/lastname/{lastName}")
     public ResponseEntity<Map<String, Object>> findOwnerByLastName(
-            @PathVariable String lastName,
-            @RequestParam(defaultValue = "1") int page,
-            @RequestParam(defaultValue = "5") int size) {
+            @Parameter(description = "Last name of the owner", example = "Coleman", required = true) @PathVariable String lastName,
+            @Parameter(description = "Requested page number", example = "1") @RequestParam(defaultValue = "1") int page,
+            @Parameter(description = "Requested page size", example = "5") @RequestParam(defaultValue = "5") int size) {
         Page<Owner> pageRes = ownerRepository.findByLastNameStartingWith(lastName, PageRequest.of(page - 1, size));
 
         Map<String, Object> res = new HashMap<>();
@@ -39,8 +56,12 @@ public class OwnerRestController {
         return ResponseEntity.ok(res);
     }
 
+    @Operation(summary = "Create new owner", description = "Create a new owner")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "201", description = "Owner created successfully")
+    })
     @PostMapping("/new")
-    public ResponseEntity<Map<String, Integer>> createNewOwner(@RequestBody CreateOrUpdateOwnerRequestDTO requestDTO) {
+    public ResponseEntity<Map<String, Integer>> createNewOwner(@Valid @RequestBody CreateOrUpdateOwnerRequestDTO requestDTO) {
         Owner owner = new Owner();
         mapOwnerAttributes(owner, requestDTO);
         Owner savedOwner = ownerRepository.save(owner);
@@ -49,8 +70,14 @@ public class OwnerRestController {
         return new ResponseEntity<>(res, HttpStatus.CREATED);
     }
 
+    @Operation(summary = "Update owner details", description = "Update owner details by ownerId")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "Owner details updated successfully")
+    })
     @PutMapping("/{ownerId}/edit")
-    public ResponseEntity<Owner> editExistingOwner(@PathVariable int ownerId, @RequestBody CreateOrUpdateOwnerRequestDTO requestDTO) {
+    public ResponseEntity<Owner> editExistingOwner(
+            @Parameter(description = "Id of the owner", example = "1", required = true) @PathVariable int ownerId,
+            @RequestBody CreateOrUpdateOwnerRequestDTO requestDTO) {
         Owner existingOwner = ownerRepository.findById(ownerId).orElseThrow(() -> new IllegalArgumentException("Owner not found with id: " + ownerId
                 + ". Please ensure the ID is correct " + "and the owner exists in the database."));
         mapOwnerAttributes(existingOwner, requestDTO);
