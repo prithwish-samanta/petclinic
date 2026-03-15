@@ -1,7 +1,10 @@
 package dev.prithwish.petclinic.vet;
 
+import dev.prithwish.petclinic.system.ErrorResponseDTO;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
+import io.swagger.v3.oas.annotations.media.Content;
+import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
@@ -28,7 +31,8 @@ public class VetRestController {
 
     @Operation(summary = "Get veterinarians", description = "Fetch all the available vets in the clinic")
     @ApiResponses(value = {
-            @ApiResponse(responseCode = "200", description = "Vets retrieved successfully")
+            @ApiResponse(responseCode = "200", description = "Vets retrieved successfully"),
+            @ApiResponse(responseCode = "500", description = "Internal server error", content = @Content(schema = @Schema(implementation = ErrorResponseDTO.class)))
     })
     @GetMapping
     public ResponseEntity<Map<String, Object>> showVets(

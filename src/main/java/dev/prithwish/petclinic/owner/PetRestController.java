@@ -1,8 +1,12 @@
 package dev.prithwish.petclinic.owner;
 
 import org.springframework.web.bind.annotation.*;
+import dev.prithwish.petclinic.exception.ResourceNotFoundException;
+import dev.prithwish.petclinic.system.ErrorResponseDTO;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
+import io.swagger.v3.oas.annotations.media.Content;
+import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
@@ -24,13 +28,15 @@ public class PetRestController {
 
     @Operation(summary = "Get pet by id", description = "Fetch pet details by ownerId and petId")
     @ApiResponses(value = {
-            @ApiResponse(responseCode = "200", description = "Pet details retrieved successfully")
+            @ApiResponse(responseCode = "200", description = "Pet details retrieved successfully"),
+            @ApiResponse(responseCode = "404", description = "Owner details not found", content = @Content(schema = @Schema(implementation = ErrorResponseDTO.class))),
+            @ApiResponse(responseCode = "500", description = "Internal server error", content = @Content(schema = @Schema(implementation = ErrorResponseDTO.class)))
     })
     @GetMapping("/{petId}/owners/{ownerId}")
     public ResponseEntity<Map<String, Object>> findPet(
             @Parameter(description = "Id of the owner", example = "1", required = true) @PathVariable int ownerId,
             @Parameter(description = "Id of the pet", example = "1", required = true) @PathVariable int petId) {
-        Owner owner = ownerRepository.findById(ownerId).orElseThrow(() -> new IllegalArgumentException("Owner not found with id: " + ownerId
+        Owner owner = ownerRepository.findById(ownerId).orElseThrow(() -> new ResourceNotFoundException("Owner not found with id: " + ownerId
                 + ". Please ensure the ID is correct " + "and the owner exists in the database."));
         Pet pet = owner.getPetById(petId);
         Map<String, Object> res = new HashMap<>();
@@ -40,7 +46,8 @@ public class PetRestController {
 
     @Operation(summary = "Get all pet types", description = "Fetch all available pet types for the clinic")
     @ApiResponses(value = {
-            @ApiResponse(responseCode = "200", description = "Pet types retrieved successfully")
+            @ApiResponse(responseCode = "200", description = "Pet types retrieved successfully"),
+            @ApiResponse(responseCode = "500", description = "Internal server error", content = @Content(schema = @Schema(implementation = ErrorResponseDTO.class)))
     })
     @GetMapping("/types")
     public ResponseEntity<Map<String, Object>> findAvailablePetTypes() {
@@ -51,17 +58,19 @@ public class PetRestController {
 
     @Operation(summary = "Create a new pet", description = "Create new pet for the owner")
     @ApiResponses(value = {
-            @ApiResponse(responseCode = "201", description = "Pet created successfully")
+            @ApiResponse(responseCode = "201", description = "Pet created successfully"),
+            @ApiResponse(responseCode = "404", description = "Owner or pet type not found", content = @Content(schema = @Schema(implementation = ErrorResponseDTO.class))),
+            @ApiResponse(responseCode = "500", description = "Internal server error", content = @Content(schema = @Schema(implementation = ErrorResponseDTO.class)))
     })
     @PostMapping("/owners/{ownerId}/new")
     public ResponseEntity<String> createNewPet(
             @Valid @RequestBody CreateOrUpdatePetRequestDTO requestDTO,
             @Parameter(description = "Id of the owner", example = "1", required = true) @PathVariable int ownerId) {
-        Owner owner = ownerRepository.findById(ownerId).orElseThrow(() -> new IllegalArgumentException("Owner not found with id: " + ownerId
+        Owner owner = ownerRepository.findById(ownerId).orElseThrow(() -> new ResourceNotFoundException("Owner not found with id: " + ownerId
                 + ". Please ensure the ID is correct " + "and the owner exists in the database."));
         PetType petType = petTypeRepository.findByName(requestDTO.petType().toLowerCase());
         if (petType == null) {
-            throw new IllegalArgumentException("Pet with name " + requestDTO.petType() + " not found.");
+            throw new ResourceNotFoundException("Pet with name " + requestDTO.petType() + " not found.");
         }
         Pet pet = new Pet();
         pet.setName(requestDTO.name());
@@ -74,22 +83,24 @@ public class PetRestController {
 
     @Operation(summary = "Update pet details", description = "Update pet details by ownerId and petId")
     @ApiResponses(value = {
-            @ApiResponse(responseCode = "200", description = "Pet details updated successfully")
+            @ApiResponse(responseCode = "200", description = "Pet details updated successfully"),
+            @ApiResponse(responseCode = "404", description = "Owner or pet type or pet details not found", content = @Content(schema = @Schema(implementation = ErrorResponseDTO.class))),
+            @ApiResponse(responseCode = "500", description = "Internal server error", content = @Content(schema = @Schema(implementation = ErrorResponseDTO.class)))
     })
     @PutMapping("{petId}/owners/{ownerId}/edit")
     public ResponseEntity<String> editExistingPetDetails(
             @Valid @RequestBody CreateOrUpdatePetRequestDTO requestDTO,
             @Parameter(description = "Id of the owner", example = "1", required = true) @PathVariable int ownerId,
             @Parameter(description = "Id of the pet", example = "1", required = true) @PathVariable int petId) {
-        Owner owner = ownerRepository.findById(ownerId).orElseThrow(() -> new IllegalArgumentException("Owner not found with id: " + ownerId
+        Owner owner = ownerRepository.findById(ownerId).orElseThrow(() -> new ResourceNotFoundException("Owner not found with id: " + ownerId
                 + ". Please ensure the ID is correct " + "and the owner exists in the database."));
         PetType petType = petTypeRepository.findByName(requestDTO.petType().toLowerCase());
         if (petType == null) {
-            throw new IllegalArgumentException("Pet with name " + requestDTO.petType() + " not found.");
+            throw new ResourceNotFoundException("Pet with name " + requestDTO.petType() + " not found.");
         }
         Pet pet = owner.getPetById(petId);
         if (pet == null) {
-            throw new IllegalArgumentException(
+            throw new ResourceNotFoundException(
                     "Pet with id " + petId + " not found for owner with id " + ownerId + ".");
         }
         pet.setName(requestDTO.name());
